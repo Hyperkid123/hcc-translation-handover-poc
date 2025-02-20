@@ -1,12 +1,6 @@
-import { load } from 'js-yaml'
-import { readFileSync, mkdirSync, existsSync, writeFileSync, rmSync, copyFileSync } from 'fs'
+import { mkdirSync, existsSync, writeFileSync, rmSync, copyFileSync } from 'fs'
 import { resolve } from 'path'
-import { execSync } from 'child_process'
-
-const __dirname = resolve()
-const MODULES_CONFIG_PATH = resolve(__dirname, 'modules.yaml')
-const MODULES_DIR_PATH = resolve(__dirname, 'modules')
-const TEMP_DIR_PATH = resolve(__dirname, 'temp')
+import { cloneRepository, loadConfig, MODULES_DIR_PATH, TEMP_DIR_PATH } from './common.js'
 
 
 function findOrCreateDir(pathname) {
@@ -26,10 +20,6 @@ function cleanTemp() {
   rmSync(TEMP_DIR_PATH, { recursive: true })
 }
 
-function cloneTag(strings, id, remote) {
-  const str = strings[0]
-  return `${str}${remote} ${resolve(TEMP_DIR_PATH, id)} --depth 1`
-}
 
 function templateTag(_strings, id, filename) {
   return resolve(MODULES_DIR_PATH, id, filename)
@@ -39,10 +29,6 @@ function sourceTag(_strings, id, filename) {
   return resolve(TEMP_DIR_PATH, id, filename)
 }
 
-function cloneRepository(id, remote) {
-  const cmd = cloneTag`git clone ${id} ${remote}`
-  execSync(cmd, { stdio: 'inherit' })
-}
 
 function loadTranslationTemplate(id, templateFilename = 'package.json') {
   // using package.json as a template for testing
@@ -57,12 +43,7 @@ function loadTranslationTemplate(id, templateFilename = 'package.json') {
 
 function main() {
   findOrCreateDir(TEMP_DIR_PATH)
-  const modulesFile = readFileSync(MODULES_CONFIG_PATH, 'utf8')
-  /**
-   * @type
-   * {{ modules: { id: string; "git-remote": string; languages: string[] }[] }}
-   */
-  const { modules } = load(modulesFile)
+  const modules = loadConfig()
   modules.forEach(({ id, languages, 'git-remote': remote }) => {
     cloneRepository(id, remote)
     languages.forEach((language) => {
