@@ -1,0 +1,11 @@
+modules:
+  - id: insights-chrome
+    git-remote: git@github.com:RedHatInsights/insights-chrome.git
+    languages:
+      - jpn
+      - cz
+  - id: insights-rbac-ui
+    git-remote: git@github.com:RedHatInsights/insights-rbac-ui.git
+    languages:
+      - jpn
+      - cz
